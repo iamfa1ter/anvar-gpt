@@ -5,7 +5,7 @@ A Claude Code-style terminal agent powered by OpenRouter.
 ## Install (one line)
 
 ```bash
-pip install git+https://github.com/YOUR_USERNAME/anvar-gpt.git
+pip install git+https://github.com/iamfa1ter/anvar-gpt.git
 ```
 
 Then run from any terminal:
