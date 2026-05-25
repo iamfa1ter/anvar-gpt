@@ -19,7 +19,14 @@ Be concise, direct, and technically precise. Terminal style."""
 
 class Agent:
     def __init__(self, config: dict) -> None:
-        self.client  = OpenAI(api_key=config["api_key"], base_url=config["base_url"])
+        self.client  = OpenAI(
+            api_key=config["api_key"],
+            base_url=config["base_url"],
+            default_headers={
+                "HTTP-Referer": "https://anvar-gpt.app",
+                "X-Title": "Anvar GPT",
+            },
+        )
         self.model   = config["model"]
         self.history: list[dict] = []
 
