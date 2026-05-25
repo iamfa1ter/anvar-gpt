@@ -1,0 +1,2 @@
+[console_scripts]
+anvar = anvar.__main__:main

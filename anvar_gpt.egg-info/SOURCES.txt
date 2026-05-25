@@ -1,0 +1,13 @@
+README.md
+pyproject.toml
+anvar/__init__.py
+anvar/__main__.py
+anvar/agent.py
+anvar/config.py
+anvar/tools.py
+anvar_gpt.egg-info/PKG-INFO
+anvar_gpt.egg-info/SOURCES.txt
+anvar_gpt.egg-info/dependency_links.txt
+anvar_gpt.egg-info/entry_points.txt
+anvar_gpt.egg-info/requires.txt
+anvar_gpt.egg-info/top_level.txt

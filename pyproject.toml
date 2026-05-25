@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=42"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "anvar-gpt"
+version = "1.0.0"
+description = "Anvar GPT — Terminal AI Agent"
+requires-python = ">=3.9"
+dependencies = [
+    "openai>=1.0.0",
+    "rich>=13.0.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.scripts]
+anvar = "anvar.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["anvar*"]
