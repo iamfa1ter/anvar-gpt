@@ -12,7 +12,7 @@ if sys.stderr.encoding and sys.stderr.encoding.lower() not in ("utf-8", "utf8"):
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
 from rich.console import Console
-from .config import load_config, setup_config
+from .config import load_config
 from .agent import Agent
 
 BANNER = r"""[bold green]
@@ -49,8 +49,6 @@ def main() -> None:
     console = Console(force_terminal=True, highlight=False)
 
     config = load_config()
-    if not config.get("api_key"):
-        config = setup_config(console)
 
     console.clear()
     console.print(BANNER)
