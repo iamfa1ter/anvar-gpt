@@ -13,7 +13,7 @@ DEFAULTS = {
 
 def load_config() -> dict:
     if CONFIG_FILE.exists():
-        data = json.loads(CONFIG_FILE.read_text(encoding="utf-8"))
+        data = json.loads(CONFIG_FILE.read_text(encoding="utf-8-sig"))
         if data.get("api_key"):
             return {**DEFAULTS, **data}
 
