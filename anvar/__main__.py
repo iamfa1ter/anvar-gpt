@@ -25,6 +25,14 @@ from .agent import Agent
 
 VERSION = "2.1.0"
 
+# ── Logo ──────────────────────────────────────────────────────────────────────
+def _render_logo() -> str:
+    try:
+        import pyfiglet
+        return pyfiglet.figlet_format("ANVAR", font="banner3")
+    except Exception:
+        return "  A N V A R  G P T\n"
+
 AVAILABLE_MODELS = [
     ("openai/gpt-oss-120b:free",              "GPT OSS 120B  — default, free"),
     ("openai/gpt-4o",                          "GPT-4o        — best OpenAI (paid)"),
@@ -38,11 +46,16 @@ AVAILABLE_MODELS = [
 def _welcome(console: Console, model: str) -> None:
     cwd = str(Path.cwd())
 
+    # Big pixel logo
+    logo = _render_logo()
+    for line in logo.splitlines():
+        console.print(f"[bold green]{line}[/bold green]")
+    console.print()
+
     left_body = Align.center(
         Text.assemble(
             ("\n", ""),
-            ("A N V A R G P T\n", "bold green"),
-            (f"v{VERSION}\n\n", "dim"),
+            (f"v{VERSION}  ·  AI Coding Agent\n\n", "dim"),
             ("model  ", "dim"),   (model.split("/")[-1].replace(":free","") + "\n", "green"),
             ("dir    ", "dim"),   (Path(cwd).name + "\n", "green"),
             ("engine ", "dim"),   ("OpenRouter\n", "green"),
