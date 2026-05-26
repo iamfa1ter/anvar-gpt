@@ -1,29 +1,45 @@
+"""AnvarGPT agent — streaming tool-calling loop with Rich UI."""
 from __future__ import annotations
 import json
+import os
 from openai import OpenAI
 from rich.console import Console
+from rich.text import Text
 from .tools import TOOLS, execute_tool
 
-SYSTEM_PROMPT = """You are Anvar GPT — a powerful terminal AI agent, like Claude Code.
+SYSTEM_PROMPT = """\
+You are Anvar — a powerful AI software engineer running as a CLI agent on the user's computer.
+You have direct access to their filesystem and can execute any shell command.
 
-You help users with:
-- Writing, reading, and editing code and files
-- Running shell commands and debugging errors
-- Explaining concepts and answering questions
-- Building projects from scratch
+## How to work
+- Take initiative: when asked to do something, DO it — don't explain, just act
+- Always call read_file before editing an existing file
+- Use edit_file for targeted changes; use write_file for new files or full rewrites
+- After making changes, verify: re-read the file or run the code
+- If a command fails, read the error carefully and fix it — iterate until it works
+- Be concise: short explanations, show progress through actions
 
-You have access to tools: read_file, write_file, create_file, list_directory, run_command.
-Use them proactively when it makes sense — don't ask, just act.
-Be concise, direct, and technically precise. Terminal style."""
+## Tool usage patterns
+- Understand a codebase  → list_directory → glob_files → read_file key files
+- Fix a bug              → read_file → edit_file → bash to verify
+- Add a feature          → read relevant files → write/edit → bash tests
+- Debug an error         → bash → read error → find cause → fix → bash again
+- Find something         → grep_files or glob_files first
+
+## Response style
+- Lead with actions, not lengthy explanations
+- After finishing, give a brief 1-2 sentence summary
+- Ask clarifying questions only when truly blocked\
+"""
 
 
 class Agent:
     def __init__(self, config: dict) -> None:
-        self.client  = OpenAI(
+        self.client = OpenAI(
             api_key=config["api_key"],
             base_url=config["base_url"],
             default_headers={
-                "HTTP-Referer": "https://anvar-gpt.app",
+                "HTTP-Referer": "https://anvargpt.vercel.app",
                 "X-Title": "Anvar GPT",
             },
         )
@@ -36,11 +52,13 @@ class Agent:
     def clear_history(self) -> None:
         self.history = []
 
+    # ── Public chat entry point ───────────────────────────────────────────────
+
     def chat(self, user_input: str, console: Console) -> None:
         self.history.append({"role": "user", "content": user_input})
         messages = [{"role": "system", "content": SYSTEM_PROMPT}] + self.history
 
-        for _ in range(10):   # max 10 tool-call rounds
+        for _round in range(12):
             try:
                 response = self.client.chat.completions.create(
                     model=self.model,
@@ -53,10 +71,10 @@ class Agent:
                 console.print(f"\n[red]API error: {e}[/red]\n")
                 return
 
-            text_chunks: list[str]       = []
-            tool_calls_raw: dict         = {}
-            finish_reason: str | None    = None
-            streaming_started            = False
+            text_chunks: list[str]    = []
+            tool_calls_raw: dict      = {}
+            finish_reason: str | None = None
+            streaming_started         = False
 
             for chunk in response:
                 choice = chunk.choices[0] if chunk.choices else None
@@ -65,6 +83,7 @@ class Agent:
                 delta         = choice.delta
                 finish_reason = choice.finish_reason or finish_reason
 
+                # Stream text in real time
                 if delta.content:
                     if not streaming_started:
                         console.print()
@@ -72,6 +91,7 @@ class Agent:
                     text_chunks.append(delta.content)
                     console.print(delta.content, end="", markup=False, highlight=False)
 
+                # Accumulate tool calls (streamed in fragments)
                 if delta.tool_calls:
                     for tc in delta.tool_calls:
                         idx = tc.index
@@ -86,7 +106,7 @@ class Agent:
                                 tool_calls_raw[idx]["arguments"] += tc.function.arguments
 
             full_text = "".join(text_chunks)
-            if full_text:
+            if streaming_started:
                 console.print()
 
             # No tool calls → done
@@ -96,10 +116,10 @@ class Agent:
                 console.print()
                 return
 
-            # Build assistant message with tool_calls
+            # Build structured list
             tool_calls_list = [
                 {
-                    "id": tool_calls_raw[i]["id"],
+                    "id":   tool_calls_raw[i]["id"],
                     "type": "function",
                     "function": {
                         "name":      tool_calls_raw[i]["name"],
@@ -108,32 +128,50 @@ class Agent:
                 }
                 for i in sorted(tool_calls_raw)
             ]
-            messages.append({"role": "assistant", "content": full_text or None, "tool_calls": tool_calls_list})
+            messages.append({
+                "role":       "assistant",
+                "content":    full_text or None,
+                "tool_calls": tool_calls_list,
+            })
 
-            # Execute tools
+            # ── Execute tools with styled output ─────────────────────────────
             console.print()
             for tc in tool_calls_list:
-                name   = tc["function"]["name"]
-                args   = tc["function"]["arguments"]
-                preview = self._preview_args(args)
-                console.print(f"[dim green]  >> {name}({preview})[/dim green]")
-                result = execute_tool(name, args)
-                short  = result[:120] + ("…" if len(result) > 120 else "")
-                console.print(f"[dim]    → {short}[/dim]")
-                messages.append({"role": "tool", "tool_call_id": tc["id"], "content": result})
+                name    = tc["function"]["name"]
+                args_js = tc["function"]["arguments"]
+                preview = _preview_args(args_js)
 
-            console.print()
+                # Header line: ● bash(command='ls -la')
+                label = Text()
+                label.append("  ● ", style="bold green")
+                label.append(name, style="bold cyan")
+                label.append(f"({preview})", style="dim")
+                console.print(label)
 
-        console.print("[yellow]Reached max tool iterations.[/yellow]\n")
+                result = execute_tool(name, args_js)
 
-    @staticmethod
-    def _preview_args(arguments: str) -> str:
-        try:
-            d = json.loads(arguments)
-            parts = []
-            for k, v in d.items():
-                s = str(v)
-                parts.append(f"{k}={s[:40]!r}" if len(s) > 40 else f"{k}={s!r}")
-            return ", ".join(parts)
-        except Exception:
-            return arguments[:60]
+                # Print result lines, dimmed
+                display = result[:600] + (" …" if len(result) > 600 else "")
+                for line in display.splitlines():
+                    console.print(f"  [dim]{line}[/dim]")
+
+                console.print()
+                messages.append({
+                    "role":         "tool",
+                    "tool_call_id": tc["id"],
+                    "content":      result,
+                })
+
+        console.print("[yellow]  ⚠  Reached max tool iterations.[/yellow]\n")
+
+
+def _preview_args(arguments: str) -> str:
+    try:
+        d = json.loads(arguments)
+        parts = []
+        for k, v in d.items():
+            s = str(v).replace("\n", "↵")
+            parts.append(f"{k}={s[:50]!r}" if len(s) > 50 else f"{k}={s!r}")
+        return ", ".join(parts)
+    except Exception:
+        return arguments[:80]
