@@ -68,7 +68,7 @@ class Agent:
         self.history.append({"role": "user", "content": user_input})
         messages = [{"role": "system", "content": SYSTEM_PROMPT}] + self.history
 
-        for _round in range(30):
+        while True:
             try:
                 response = self.client.chat.completions.create(
                     model=self.model,
@@ -150,10 +150,8 @@ class Agent:
                 args_js = tc["function"]["arguments"]
                 color   = _TOOL_COLORS.get(name, "cyan")
 
-                # Build a readable one-line preview of the args
                 preview = _preview_args(args_js)
 
-                # Tool call box
                 console.print(Panel(
                     f"[dim]{preview}[/dim]",
                     title=f"[bold {color}]{name}[/bold {color}]",
@@ -163,7 +161,6 @@ class Agent:
 
                 result = execute_tool(name, args_js)
 
-                # Result output (dimmed, capped at 30 lines)
                 lines = result.splitlines()
                 shown = lines[:30]
                 for line in shown:
@@ -177,10 +174,6 @@ class Agent:
                     "tool_call_id": tc["id"],
                     "content":      result,
                 })
-
-        console.print(
-            "\n[yellow]Task too complex to finish in one go — try breaking it into smaller steps.[/yellow]\n"
-        )
 
 
 def _preview_args(arguments: str) -> str:
