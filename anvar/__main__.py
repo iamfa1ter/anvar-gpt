@@ -26,12 +26,22 @@ from .agent import Agent
 VERSION = "2.1.0"
 
 # ── Logo ──────────────────────────────────────────────────────────────────────
+_LOGO = r"""
+ ######    ##    ## ##     ##    ###    ########
+##    ## ###   ## ##     ##   ## ##   ##     ##
+##       ####  ## ##     ##  ##   ##  ##     ##
+##       ## ## ## ##     ## ##     ## ########
+##       ##  ####  ##   ##  ######### ##   ##
+##    ## ##   ###   ## ##   ##     ## ##    ##
+ ######  ##    ##    ###    ##     ## ##     ##
+"""
+
 def _render_logo() -> str:
     try:
         import pyfiglet
         return pyfiglet.figlet_format("ANVAR", font="banner3")
     except Exception:
-        return "  A N V A R  G P T\n"
+        return _LOGO
 
 AVAILABLE_MODELS = [
     ("openai/gpt-oss-120b:free",              "GPT OSS 120B  — default, free"),
