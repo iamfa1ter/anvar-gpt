@@ -68,7 +68,7 @@ class Agent:
         self.history.append({"role": "user", "content": user_input})
         messages = [{"role": "system", "content": SYSTEM_PROMPT}] + self.history
 
-        for _round in range(12):
+        for _round in range(30):
             try:
                 response = self.client.chat.completions.create(
                     model=self.model,
@@ -178,10 +178,9 @@ class Agent:
                     "content":      result,
                 })
 
-        console.print(Panel(
-            "[yellow]Reached max tool iterations.[/yellow]",
-            border_style="yellow",
-        ))
+        console.print(
+            "\n[yellow]Task too complex to finish in one go — try breaking it into smaller steps.[/yellow]\n"
+        )
 
 
 def _preview_args(arguments: str) -> str:
