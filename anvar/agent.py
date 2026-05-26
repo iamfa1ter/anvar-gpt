@@ -1,10 +1,11 @@
 """AnvarGPT agent — streaming tool-calling loop with Rich UI."""
 from __future__ import annotations
-import json
-import os
+import json, os
 from openai import OpenAI
 from rich.console import Console
+from rich.panel import Panel
 from rich.text import Text
+from rich.rule import Rule
 from .tools import TOOLS, execute_tool
 
 SYSTEM_PROMPT = """\
@@ -32,6 +33,17 @@ You have direct access to their filesystem and can execute any shell command.
 - Ask clarifying questions only when truly blocked\
 """
 
+# Tool name → border color
+_TOOL_COLORS = {
+    "bash":           "cyan",
+    "read_file":      "blue",
+    "write_file":     "green",
+    "edit_file":      "yellow",
+    "list_directory": "blue",
+    "glob_files":     "magenta",
+    "grep_files":     "magenta",
+}
+
 
 class Agent:
     def __init__(self, config: dict) -> None:
@@ -52,8 +64,6 @@ class Agent:
     def clear_history(self) -> None:
         self.history = []
 
-    # ── Public chat entry point ───────────────────────────────────────────────
-
     def chat(self, user_input: str, console: Console) -> None:
         self.history.append({"role": "user", "content": user_input})
         messages = [{"role": "system", "content": SYSTEM_PROMPT}] + self.history
@@ -68,7 +78,11 @@ class Agent:
                     stream=True,
                 )
             except Exception as e:
-                console.print(f"\n[red]API error: {e}[/red]\n")
+                console.print(Panel(
+                    f"[red]{e}[/red]",
+                    title="[red]API Error[/red]",
+                    border_style="red",
+                ))
                 return
 
             text_chunks: list[str]    = []
@@ -83,7 +97,6 @@ class Agent:
                 delta         = choice.delta
                 finish_reason = choice.finish_reason or finish_reason
 
-                # Stream text in real time
                 if delta.content:
                     if not streaming_started:
                         console.print()
@@ -91,7 +104,6 @@ class Agent:
                     text_chunks.append(delta.content)
                     console.print(delta.content, end="", markup=False, highlight=False)
 
-                # Accumulate tool calls (streamed in fragments)
                 if delta.tool_calls:
                     for tc in delta.tool_calls:
                         idx = tc.index
@@ -109,14 +121,12 @@ class Agent:
             if streaming_started:
                 console.print()
 
-            # No tool calls → done
             if finish_reason != "tool_calls" or not tool_calls_raw:
                 if full_text:
                     self.history.append({"role": "assistant", "content": full_text})
                 console.print()
                 return
 
-            # Build structured list
             tool_calls_list = [
                 {
                     "id":   tool_calls_raw[i]["id"],
@@ -134,35 +144,44 @@ class Agent:
                 "tool_calls": tool_calls_list,
             })
 
-            # ── Execute tools with styled output ─────────────────────────────
-            console.print()
+            # ── Render each tool call ─────────────────────────────────────────
             for tc in tool_calls_list:
                 name    = tc["function"]["name"]
                 args_js = tc["function"]["arguments"]
+                color   = _TOOL_COLORS.get(name, "cyan")
+
+                # Build a readable one-line preview of the args
                 preview = _preview_args(args_js)
 
-                # Header line: ● bash(command='ls -la')
-                label = Text()
-                label.append("  ● ", style="bold green")
-                label.append(name, style="bold cyan")
-                label.append(f"({preview})", style="dim")
-                console.print(label)
+                # Tool call box
+                console.print(Panel(
+                    f"[dim]{preview}[/dim]",
+                    title=f"[bold {color}]{name}[/bold {color}]",
+                    border_style=color + " dim",
+                    padding=(0, 1),
+                ))
 
                 result = execute_tool(name, args_js)
 
-                # Print result lines, dimmed
-                display = result[:600] + (" …" if len(result) > 600 else "")
-                for line in display.splitlines():
+                # Result output (dimmed, capped at 30 lines)
+                lines = result.splitlines()
+                shown = lines[:30]
+                for line in shown:
                     console.print(f"  [dim]{line}[/dim]")
-
+                if len(lines) > 30:
+                    console.print(f"  [dim]  ... ({len(lines)-30} more lines)[/dim]")
                 console.print()
+
                 messages.append({
                     "role":         "tool",
                     "tool_call_id": tc["id"],
                     "content":      result,
                 })
 
-        console.print("[yellow]  ⚠  Reached max tool iterations.[/yellow]\n")
+        console.print(Panel(
+            "[yellow]Reached max tool iterations.[/yellow]",
+            border_style="yellow",
+        ))
 
 
 def _preview_args(arguments: str) -> str:
@@ -170,8 +189,8 @@ def _preview_args(arguments: str) -> str:
         d = json.loads(arguments)
         parts = []
         for k, v in d.items():
-            s = str(v).replace("\n", "↵")
-            parts.append(f"{k}={s[:50]!r}" if len(s) > 50 else f"{k}={s!r}")
+            s = str(v).replace("\n", "\\n")
+            parts.append(f"{k}={s[:60]!r}" if len(s) > 60 else f"{k}={s!r}")
         return ", ".join(parts)
     except Exception:
         return arguments[:80]

@@ -4,13 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "anvar-gpt"
-version = "2.0.0"
+version = "2.1.0"
 description = "AnvarGPT — AI coding agent for your terminal (like Claude Code)"
 requires-python = ">=3.9"
 dependencies = [
     "openai>=1.0.0",
     "rich>=13.0.0",
     "python-dotenv>=1.0.0",
+    "prompt_toolkit>=3.0.0",
 ]
 
 [project.scripts]
