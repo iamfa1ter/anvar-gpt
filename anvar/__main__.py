@@ -159,6 +159,7 @@ def main() -> None:
                     ("/cd [path]   ", "cyan"), ("change directory\n",         "dim"),
                     ("/ls          ", "cyan"), ("list files here\n",          "dim"),
                     ("/cwd         ", "cyan"), ("show current path\n",        "dim"),
+                    ("/serve       ", "cyan"), ("bridge web terminal to this PC\n","dim"),
                     ("/exit        ", "cyan"), ("quit\n\n",                   "dim"),
                     ("Agent tools\n\n",            "bold green"),
                     ("bash         ", "green"), ("run any shell command\n",   "dim"),
@@ -219,6 +220,12 @@ def main() -> None:
                 console.print(f"[green]{os.getcwd()}[/green]\n")
             except Exception as e:
                 console.print(f"[red]cd: {e}[/red]\n")
+            continue
+
+        if lo in ("/serve", "serve"):
+            from .server import start as _serve
+            console.print(f"[dim]Starting local bridge on port 7723…[/dim]")
+            _serve(config["api_key"], config["model"], console)
             continue
 
         if user_input.startswith("/"):
