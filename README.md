@@ -1,52 +1,60 @@
-# Anvar GPT — Terminal AI Agent
+# Anvar CLI — AI coding agent for your terminal
 
-A Claude Code-style terminal agent powered by OpenRouter.
+A Claude Code-style agent that reads and writes files, runs commands and fixes code on your computer.
+It ships as a native app — no Python, Node or API keys needed — and comes with 32 AI models from
+Cloudflare and NVIDIA through https://anvargpt.vercel.app.
 
-## Install (one line)
+## Install
+
+**Windows (PowerShell)**
+
+```powershell
+irm https://anvargpt.vercel.app/install.ps1 | iex
+```
+
+**Windows (CMD)**
+
+```bat
+curl -fsSL https://anvargpt.vercel.app/install.cmd -o install.cmd && install.cmd && del install.cmd
+```
+
+**macOS / Linux**
 
 ```bash
-pip install git+https://github.com/iamfa1ter/anvar-gpt.git
+curl -fsSL https://anvargpt.vercel.app/install.sh | bash
 ```
 
-Then run from any terminal:
+The installer downloads the build for your system from the
+[latest release](https://github.com/iamfa1ter/anvar-gpt/releases/latest), checks its SHA-256 checksum
+and puts `anvar` on your PATH. Open a new terminal afterwards.
+
+## Use
 
 ```bash
-anvar
+anvar                  # interactive session
+anvar -p "fix the failing test"   # one prompt, then exit
+anvar serve            # let the Terminal on anvargpt.vercel.app use this computer
+anvar update           # install the latest version
 ```
 
-## First run
-
-On first run it will ask for your OpenRouter API key.
-Get one free at https://openrouter.ai/keys
-
-Or set it as an environment variable to skip the prompt:
-
-```
-# Windows
-set OPENROUTER_API_KEY=sk-or-v1-...
-
-# Mac / Linux
-export OPENROUTER_API_KEY=sk-or-v1-...
-```
-
-## What it can do
-
-- Read and write files on your PC
-- Run shell commands
-- Write, fix, and explain code
-- Answer any question
-- Multi-turn conversation with memory
-
-## Commands
+Inside a session:
 
 | Command | Description |
 |---|---|
-| `/clear` | Clear conversation history |
-| `/model ID` | Switch model (e.g. `/model openai/gpt-4o`) |
-| `/ls` | List files in current directory |
-| `/cwd` | Show current directory |
-| `/exit` | Exit |
+| `/models` | list all 32 models |
+| `/model <name>` | switch model, e.g. `/model gpt-oss-120b` |
+| `/effort <level>` | low, medium, high, xhigh, max, ultracode |
+| `/compact`, `/context`, `/usage` | manage the conversation |
+| `/review`, `/security-review` | review uncommitted changes |
+| `/help` | everything else |
 
-## Default model
+## Web terminal
 
-`anthropic/claude-haiku-4-5` via OpenRouter
+`anvar serve` starts a bridge on `localhost:7723` so the Terminal on https://anvargpt.vercel.app can run
+commands and the AI agent on your machine. It only accepts requests from that site. Chrome asks once
+for permission to reach apps on your local network — click Allow.
+
+## Python version
+
+The Python package in this repository (`pip install git+https://github.com/iamfa1ter/anvar-gpt.git`)
+still works, but the native app above is the recommended way to install.
