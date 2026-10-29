@@ -13,6 +13,12 @@ from .agent import SYSTEM_PROMPT
 PORT     = 7723
 _OR_BASE = "https://openrouter.ai/api/v1"
 
+# Only the Anvar GPT site may drive this bridge. Without this check any web page
+# open in the browser could POST to localhost:7723 and run commands here.
+_ALLOWED_ORIGINS = {"https://anvargpt.vercel.app"}
+# Rejecting other Host values blocks DNS-rebinding attacks.
+_ALLOWED_HOSTS = {f"localhost:{PORT}", f"127.0.0.1:{PORT}"}
+
 _TOOL_COLOR = {
     "bash":           "cyan",
     "read_file":      "blue",
@@ -126,13 +132,25 @@ class _Handler(BaseHTTPRequestHandler):
     api_key: str = ""
     model: str   = ""
 
+    def _trusted(self) -> bool:
+        return (self.headers.get("Host", "") in _ALLOWED_HOSTS
+                and self.headers.get("Origin", "") in _ALLOWED_ORIGINS)
+
     def _cors(self):
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        origin = self.headers.get("Origin", "")
+        if origin in _ALLOWED_ORIGINS:
+            self.send_header("Access-Control-Allow-Origin", origin)
+            self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+            self.send_header("Access-Control-Allow-Headers", "Content-Type")
+            if self.headers.get("Access-Control-Request-Private-Network") == "true":
+                self.send_header("Access-Control-Allow-Private-Network", "true")
+        self.send_header("Vary", "Origin")
 
     def do_OPTIONS(self):
-        self.send_response(200)
+        if not self._trusted():
+            self._json(403, {"error": "forbidden"})
+            return
+        self.send_response(204)
         self._cors()
         self.end_headers()
 
@@ -146,6 +164,9 @@ class _Handler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def do_GET(self):
+        if not self._trusted():
+            self._json(403, {"error": "forbidden"})
+            return
         if self.path in ("/health", "/api/health"):
             self._json(200, {
                 "status": "ok",
@@ -158,6 +179,13 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(404, {"error": "not found"})
 
     def do_POST(self):
+        if not self._trusted():
+            self._json(403, {"error": "forbidden"})
+            return
+        # A JSON content type forces a CORS preflight, so the browser asks first.
+        if not self.headers.get("Content-Type", "").startswith("application/json"):
+            self._json(415, {"error": "application/json required"})
+            return
         if self.path not in ("/api/agent", "/agent"):
             self._json(404, {"error": "not found"})
             return
