@@ -1,60 +1,90 @@
-# Anvar CLI — AI coding agent for your terminal
+# Anvar GPT CLI
 
-A Claude Code-style agent that reads and writes files, runs commands and fixes code on your computer.
-It ships as a native app — no Python, Node or API keys needed — and comes with 32 AI models from
-Cloudflare and NVIDIA through https://anvargpt.vercel.app.
+An AI coding agent for your terminal, in hacker green. It reads and edits your
+files, runs commands, and understands photos and documents. 32 free models
+work out of the box: no sign-up and no API key.
+
+```
+▄▀▀▀▄ █▄  █ █   █ ▄▀▀▀▄ █▀▀▀▄   ▄▀▀▀▄ █▀▀▀▄ ▀▀█▀▀
+█▄▄▄█ █ ▀▄█ ▀▄ ▄▀ █▄▄▄█ █▀█▀    █ ▄▄▄ █▄▄▄▀   █
+█   █ █   █  ▀▄▀  █   █ █  ▀▄   ▀▄▄▄▀ █       █
+```
 
 ## Install
 
-**Windows (PowerShell)**
-
-```powershell
-irm https://anvargpt.vercel.app/install.ps1 | iex
-```
-
-**Windows (CMD)**
-
-```bat
-curl -fsSL https://anvargpt.vercel.app/install.cmd -o install.cmd && install.cmd && del install.cmd
-```
-
-**macOS / Linux**
-
-```bash
-curl -fsSL https://anvargpt.vercel.app/install.sh | bash
-```
-
-The installer downloads the build for your system from the
-[latest release](https://github.com/iamfa1ter/anvar-gpt/releases/latest), checks its SHA-256 checksum
-and puts `anvar` on your PATH. Open a new terminal afterwards.
-
-## Use
-
-```bash
-anvar                  # interactive session
-anvar -p "fix the failing test"   # one prompt, then exit
-anvar serve            # let the Terminal on anvargpt.vercel.app use this computer
-anvar update           # install the latest version
-```
-
-Inside a session:
-
-| Command | Description |
+| System | Command |
 |---|---|
-| `/models` | list all 32 models |
-| `/model <name>` | switch model, e.g. `/model gpt-oss-120b` |
-| `/effort <level>` | low, medium, high, xhigh, max, ultracode |
-| `/compact`, `/context`, `/usage` | manage the conversation |
-| `/review`, `/security-review` | review uncommitted changes |
-| `/help` | everything else |
+| Windows (PowerShell) | `irm https://anvargpt.vercel.app/install.ps1 \| iex` |
+| Windows (CMD) | `curl -fsSL https://anvargpt.vercel.app/install.cmd -o install.cmd && install.cmd && del install.cmd` |
+| macOS / Linux | `curl -fsSL https://anvargpt.vercel.app/install.sh \| bash` |
 
-## Web terminal
+You can also download a binary from the
+[latest release](https://github.com/iamfa1ter/anvar-gpt/releases/latest) or the
+Anvar CLI page on https://anvargpt.vercel.app. Each download has a SHA-256 checksum.
 
-`anvar serve` starts a bridge on `localhost:7723` so the Terminal on https://anvargpt.vercel.app can run
-commands and the AI agent on your machine. It only accepts requests from that site. Chrome asks once
-for permission to reach apps on your local network — click Allow.
+Then open a terminal in any folder and run `anvar`.
 
-## Python version
+## Using it
 
-The Python package in this repository (`pip install git+https://github.com/iamfa1ter/anvar-gpt.git`)
-still works, but the native app above is the recommended way to install.
+| Key | What it does |
+|---|---|
+| `enter` | send (`ctrl+j` or `\` then enter starts a new line) |
+| `tab` | switch agent: **Build** (edits files, runs commands) or **Plan** (read-only) |
+| `ctrl+p` | command palette |
+| `/` | commands and skills |
+| `@` | attach a file from this folder |
+| drag & drop | attach photos, PDF, Word, Excel, PowerPoint, code, audio |
+| `alt+v` · `/paste` | attach an image from the clipboard |
+| `!command` | run a shell command yourself |
+| `esc` | stop the answer |
+| `ctrl+o` · `ctrl+t` | full tool output · model reasoning |
+
+## Commands
+
+| Command | What it does |
+|---|---|
+| `/models` | switch model; 32 free models, plus any provider you connect |
+| `/connect` | use your own API key: OpenAI, Anthropic, Gemini, NVIDIA, Cloudflare, Groq, OpenRouter, DeepSeek, Mistral, xAI, Together, or any OpenAI-compatible server (Ollama, LM Studio…) |
+| `/prompt` | view or edit the base system prompt, or the per-project `ANVAR.md` |
+| `/skills` | list skills; `/skills new <name>` creates your own |
+| `/themes` | Hacker Green, Matrix, Classic, Transparent |
+| `/effort` | reasoning effort: low · medium · high · xhigh · max · ultracode |
+| `/sessions` · `/new` | reopen past conversations · start fresh |
+| `/undo` | undo the file changes from the last answer |
+| `/compact` | summarize the conversation to free up context |
+| `/copy` · `/export` | copy the last answer · save the chat as Markdown |
+| `/status` · `/help` | settings and keys · everything above |
+
+## Skills
+
+Built-in skills: `/init`, `/review`, `/security-review`, `/simplify`, `/verify`, `/fix`,
+`/test`, `/explain`, `/docs`, `/refactor`, `/optimize`, `/commit`, `/pr-description`.
+
+A skill is a Markdown file in `~/.anvar-gpt/skills/` (for every project) or
+`.anvar/skills/` (for one project):
+
+```markdown
+---
+description: deploy the app
+---
+Build the project and deploy it to $ARGUMENTS. Report the URL.
+```
+
+Run it as `/deploy staging`.
+
+## Scripts
+
+```bash
+anvar run "explain what this repo does"
+anvar run -f screenshot.png "what is wrong here?"
+git diff | anvar run --plan "review this diff"
+anvar models
+anvar update
+```
+
+## Where things are stored
+
+`~/.anvar-gpt/`: `config.json` for settings, `auth.json` for your API keys
+(they stay on this computer), `sessions/`, `skills/`, `ANVAR.md`.
+
+Created by Anvar Ualikhanov.
