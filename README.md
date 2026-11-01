@@ -40,6 +40,10 @@ Then open a terminal in any folder and run `anvar`.
 | `alt+v` · `/paste` | attach an image from the clipboard |
 | `!command` | run a shell command yourself |
 | `esc` | stop the answer |
+| mouse drag | select text — it is copied automatically (`ctrl+c` copies it too) |
+| **copy** button | under every answer — copies the whole answer |
+| `ctrl+n` · **+ New chat** | start a new chat; the old one is saved |
+| `ctrl+r` · **☰ Chats** | open a saved chat — `anvar -c` reopens the last one |
 | `ctrl+o` · `ctrl+t` | full tool output · model reasoning |
 
 ## Commands
@@ -52,7 +56,8 @@ Then open a terminal in any folder and run `anvar`.
 | `/skills` | list skills; `/skills new <name>` creates your own |
 | `/themes` | Hacker Green, Matrix, Classic, Transparent |
 | `/effort` | reasoning effort: low · medium · high · xhigh · max · ultracode |
-| `/sessions` · `/new` | reopen past conversations · start fresh |
+| `/chats` · `/new` | open a saved chat · start a new one |
+| `/mouse` | turn mouse capture off to use your terminal's own selection |
 | `/undo` | undo the file changes from the last answer |
 | `/compact` | summarize the conversation to free up context |
 | `/copy` · `/export` | copy the last answer · save the chat as Markdown |
