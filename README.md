@@ -2,7 +2,7 @@
 
 An AI coding agent for your terminal, in hacker green. It reads and edits your
 files, runs commands, and understands photos and documents. 32 free models
-work out of the box: no sign-up and no API key.
+work out of the box, with no sign-up.
 
 ```
  █████╗ ███╗   ██╗██╗   ██╗ █████╗ ██████╗      ██████╗ ██████╗ ████████╗
@@ -29,7 +29,7 @@ Then open a terminal in any folder and run `anvar`.
 
 ## Using it
 
-| Key | What it does |
+| Shortcut | What it does |
 |---|---|
 | `enter` | send (`ctrl+j` or `\` then enter starts a new line) |
 | `tab` | switch agent: **Build** (edits files, runs commands) or **Plan** (read-only) |
@@ -51,7 +51,7 @@ Then open a terminal in any folder and run `anvar`.
 | Command | What it does |
 |---|---|
 | `/models` | switch model; 32 free models, plus any provider you connect |
-| `/connect` | use your own API key: OpenAI, Anthropic, Gemini, NVIDIA, Cloudflare, Groq, OpenRouter, DeepSeek, Mistral, xAI, Together, or any OpenAI-compatible server (Ollama, LM Studio…) |
+| `/connect` | connect your own provider account: OpenAI, Anthropic, Gemini, NVIDIA, Cloudflare, Groq, OpenRouter, DeepSeek, Mistral, xAI, Together, or any OpenAI-compatible server (Ollama, LM Studio…) |
 | `/prompt` | view or edit the base system prompt, or the per-project `ANVAR.md` |
 | `/skills` | list skills; `/skills new <name>` creates your own |
 | `/themes` | Hacker Green, Matrix, Classic, Transparent |
@@ -61,7 +61,7 @@ Then open a terminal in any folder and run `anvar`.
 | `/undo` | undo the file changes from the last answer |
 | `/compact` | summarize the conversation to free up context |
 | `/copy` · `/export` | copy the last answer · save the chat as Markdown |
-| `/status` · `/help` | settings and keys · everything above |
+| `/status` · `/help` | current settings · everything above |
 
 ## Skills
 
@@ -92,7 +92,7 @@ anvar update
 
 ## Where things are stored
 
-`~/.anvar-gpt/`: `config.json` for settings, `auth.json` for your API keys
+`~/.anvar-gpt/`: `config.json` for settings, `auth.json` for the providers you connect
 (they stay on this computer), `sessions/`, `skills/`, `ANVAR.md`.
 
 Created by Anvar Ualikhanov.
