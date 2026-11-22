@@ -17,13 +17,13 @@ work out of the box, with no sign-up.
 
 | System | Command |
 |---|---|
-| Windows (PowerShell) | `irm https://gpt.anvargpt.workers.dev/install.ps1 \| iex` |
-| Windows (CMD) | `curl -fsSL https://gpt.anvargpt.workers.dev/install.cmd -o install.cmd && install.cmd && del install.cmd` |
-| macOS / Linux | `curl -fsSL https://gpt.anvargpt.workers.dev/install.sh \| bash` |
+| Windows (PowerShell) | `irm https://anvargpt.pages.dev/install.ps1 \| iex` |
+| Windows (CMD) | `curl -fsSL https://anvargpt.pages.dev/install.cmd -o install.cmd && install.cmd && del install.cmd` |
+| macOS / Linux | `curl -fsSL https://anvargpt.pages.dev/install.sh \| bash` |
 
 You can also download a binary from the
 [latest release](https://github.com/iamfa1ter/anvar-gpt/releases/latest) or the
-Anvar CLI page on https://gpt.anvargpt.workers.dev. Each download has a SHA-256 checksum.
+Anvar CLI page on https://anvargpt.pages.dev. Each download has a SHA-256 checksum.
 
 Then open a terminal in any folder and run `anvar`.
 
