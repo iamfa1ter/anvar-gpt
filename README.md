@@ -1,7 +1,7 @@
 # Anvar GPT CLI
 
 An AI coding agent for your terminal, in hacker green. It reads and edits your
-files, runs commands, and understands photos and documents. 32 free models
+files, runs commands, and understands photos and documents. 34 free models
 work out of the box, with no sign-up.
 
 ```
@@ -17,13 +17,13 @@ work out of the box, with no sign-up.
 
 | System | Command |
 |---|---|
-| Windows (PowerShell) | `irm https://anvargpt.vercel.app/install.ps1 \| iex` |
-| Windows (CMD) | `curl -fsSL https://anvargpt.vercel.app/install.cmd -o install.cmd && install.cmd && del install.cmd` |
-| macOS / Linux | `curl -fsSL https://anvargpt.vercel.app/install.sh \| bash` |
+| Windows (PowerShell) | `irm https://gpt.anvargpt.workers.dev/install.ps1 \| iex` |
+| Windows (CMD) | `curl -fsSL https://gpt.anvargpt.workers.dev/install.cmd -o install.cmd && install.cmd && del install.cmd` |
+| macOS / Linux | `curl -fsSL https://gpt.anvargpt.workers.dev/install.sh \| bash` |
 
 You can also download a binary from the
 [latest release](https://github.com/iamfa1ter/anvar-gpt/releases/latest) or the
-Anvar CLI page on https://anvargpt.vercel.app. Each download has a SHA-256 checksum.
+Anvar CLI page on https://gpt.anvargpt.workers.dev. Each download has a SHA-256 checksum.
 
 Then open a terminal in any folder and run `anvar`.
 
@@ -50,7 +50,7 @@ Then open a terminal in any folder and run `anvar`.
 
 | Command | What it does |
 |---|---|
-| `/models` | switch model; 32 free models, plus any provider you connect |
+| `/models` | switch model; 34 free models, plus any provider you connect |
 | `/connect` | connect your own provider account: OpenAI, Anthropic, Gemini, NVIDIA, Cloudflare, Groq, OpenRouter, DeepSeek, Mistral, xAI, Together, or any OpenAI-compatible server (Ollama, LM Studio…) |
 | `/prompt` | view or edit the base system prompt, or the per-project `ANVAR.md` |
 | `/skills` | list skills; `/skills new <name>` creates your own |
